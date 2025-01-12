@@ -376,5 +376,46 @@ df.to_csv("Final_data.csv", index=False)
 
 
 
+import pandas as pd
+from statsmodels.tsa.ar_model import AutoReg
+from sklearn.metrics import mean_squared_error
+import numpy as np
+
+# Load the training, validation, and testing data
+train_data = pd.read_csv('train_data.csv')
+val_data = pd.read_csv('validation_data.csv')
+test_data = pd.read_csv('test_data.csv')
+
+# Extract the target variable (Survival_Rate) for autoregressive modeling
+y_train = train_data['Survival_Rate'].values
+y_val = val_data['Survival_Rate'].values
+y_test = test_data['Survival_Rate'].values
+
+# Define a function to fit an autoregressive model and make predictions
+def autoregressive_model(train_series, test_series, lags):
+    # Fit the AutoReg model
+    model = AutoReg(train_series, lags=lags)
+    model_fit = model.fit()
+
+    # Print model coefficients
+    print("Model Coefficients:", model_fit.params)
+
+    # Make predictions on the training set
+    train_pred = model_fit.predict(start=lags, end=len(train_series)-1)
+
+    # Make predictions on the test set
+    test_pred = model_fit.predict(start=len(train_series), end=len(train_series) + len(test_series) - 1)
+
+    return train_pred, test_pred, model_fit
+
+# Choose the number of lags (hyperparameter to tune)
+num_lags = 5
+
+# Apply the autoregressive model
+train_pred, test_pred, model_fit = autoregressive_model(y_train, y_test, lags=num_lags)
+
+
+
+
 
 
